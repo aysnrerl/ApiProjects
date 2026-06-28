@@ -1,0 +1,62 @@
+@model ApiProjects.Models.CurrencyViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var majorCurrencies = new List<(string Code, string Name, string Flag)>
+    {
+        ("TRY", "Türk Lirası", "🇹🇷"),
+        ("EUR", "Euro", "🇪🇺"),
+        ("GBP", "İngiliz Sterlini", "🇬🇧"),
+        ("JPY", "Japon Yeni", "🇯🇵"),
+        ("CHF", "İsviçre Frangı", "🇨🇭"),
+        ("CAD", "Kanada Doları", "🇨🇦"),
+        ("AUD", "Avustralya Doları", "🇦🇺"),
+        ("CNY", "Çin Yuanı", "🇨🇳"),
+        ("SAR", "Suudi Riyali", "🇸🇦"),
+        ("AED", "BAE Dirhemi", "🇦🇪"),
+        ("NOK", "Norveç Kronu", "🇳🇴"),
+        ("SEK", "İsveç Kronu", "🇸🇪"),
+    };
+}
+
+<div class="p-6 max-w-[1200px] mx-auto animate-fadeUp">
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">💱 Döviz Kurları</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">USD bazlı anlık döviz kurları · @(Model?.time_last_update_utc ?? "")</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.rates != null)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var (code, name, flag) in majorCurrencies)
+            {
+                double rate = 0;
+                Model.rates.TryGetValue(code, out rate);
+
+                <div class="inset p-4 rounded-2xl flex items-center justify-between border border-[#1e1e2e]">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">@flag</span>
+                        <div>
+                            <p class="text-sm font-bold" style="color:#f1f5f9;">@code</p>
+                            <p class="text-xs" style="color:#64748b;">@name</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        @if (rate > 0)
+                        {
+                            <p class="text-sm font-bold text-[#34d399]">@rate.ToString("N4")</p>
+                            <p class="text-[10px]" style="color:#64748b;">1 USD</p>
+                        }
+                        else
+                        {
+                            <p class="text-sm font-bold" style="color:#334155;">—</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

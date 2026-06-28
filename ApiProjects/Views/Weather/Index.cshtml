@@ -1,0 +1,87 @@
+@model ApiProjects.Models.WeatherRoot
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[1200px] mx-auto animate-fadeUp">
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">🌤 Hava Durumu Detay Raporu</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">İstanbul için anlık ve 3 günlük tahmin</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.current != null)
+    {
+        var cur = Model.current;
+        var emoji = ApiProjects.Controllers.WeatherController.GetWeatherEmoji(cur.weathercode);
+        var desc = ApiProjects.Controllers.WeatherController.GetWeatherDescription(cur.weathercode);
+
+        <div class="card acc-cyan mb-6" style="background: linear-gradient(135deg, #16161f 0%, #0d0d15 100%);">
+            <div class="flex flex-col md:flex-row justify-between gap-6">
+                <div>
+                    <p class="text-xs uppercase font-bold tracking-widest text-[#22d3ee] mb-1">Şu Anki Durum</p>
+                    <h2 class="font-display text-4xl font-bold" style="color:#f1f5f9;">İstanbul</h2>
+                    <p class="text-5xl font-bold mt-4 font-display" style="color:#f1f5f9;">@Math.Round(cur.temperature_2m)°C</p>
+                    <p class="text-sm mt-1" style="color:#94a3b8;">@emoji @desc</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1 max-w-xl">
+                    <div class="inset p-4 rounded-xl text-center">
+                        <span class="text-xs" style="color:#64748b;">Hissedilen</span>
+                        <p class="text-lg font-bold mt-1 text-[#22d3ee]">@Math.Round(cur.apparent_temperature)°C</p>
+                    </div>
+                    <div class="inset p-4 rounded-xl text-center">
+                        <span class="text-xs" style="color:#64748b;">Nem Oranı</span>
+                        <p class="text-lg font-bold mt-1 text-[#22d3ee]">%@cur.relativehumidity_2m</p>
+                    </div>
+                    <div class="inset p-4 rounded-xl text-center">
+                        <span class="text-xs" style="color:#64748b;">Rüzgar</span>
+                        <p class="text-lg font-bold mt-1 text-[#22d3ee]">@Math.Round(cur.windspeed_10m) km/s</p>
+                    </div>
+                    @if (Model.daily != null && Model.daily.temperature_2m_max != null && Model.daily.temperature_2m_max.Count > 0)
+                    {
+                        <div class="inset p-4 rounded-xl text-center">
+                            <span class="text-xs" style="color:#64748b;">Bugün En Düşük</span>
+                            <p class="text-slate-400 font-bold mt-1">↓ @Math.Round(Model.daily.temperature_2m_min[0])°C</p>
+                        </div>
+                        <div class="inset p-4 rounded-xl text-center">
+                            <span class="text-xs" style="color:#64748b;">Bugün En Yüksek</span>
+                            <p class="text-slate-400 font-bold mt-1">↑ @Math.Round(Model.daily.temperature_2m_max[0])°C</p>
+                        </div>
+                    }
+                    <div class="inset p-4 rounded-xl text-center flex items-center justify-center text-3xl">
+                        @emoji
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.daily != null && Model.daily.time != null && Model.daily.time.Count > 0)
+        {
+            <h3 class="font-display font-bold text-lg mb-4" style="color:#f1f5f9;">📅 3 Günlük Tahmin</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                @for (int i = 0; i < Model.daily.time.Count; i++)
+                {
+                    var dayEmoji = ApiProjects.Controllers.WeatherController.GetWeatherEmoji(Model.daily.weathercode[i]);
+                    var dayDesc = ApiProjects.Controllers.WeatherController.GetWeatherDescription(Model.daily.weathercode[i]);
+                    <div class="inset p-4 rounded-2xl flex items-center justify-between border border-[#1e1e2e]">
+                        <div>
+                            <p class="text-xs font-semibold" style="color:#64748b;">@Model.daily.time[i]</p>
+                            <p class="text-base font-bold mt-1" style="color:#f1f5f9;">@dayEmoji @dayDesc</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-slate-500">↑ @Math.Round(Model.daily.temperature_2m_max[i])°</p>
+                            <p class="text-xs text-slate-500">↓ @Math.Round(Model.daily.temperature_2m_min[i])°</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-sm text-gray-500">Hava durumu verileri yüklenemedi.</p>
+    }
+</div>

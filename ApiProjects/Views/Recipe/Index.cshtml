@@ -1,0 +1,48 @@
+@model ApiProjects.Models.RecipeViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[1200px] mx-auto animate-fadeUp">
+
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">🍳 Dünya Mutfağı Tarifleri</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">TheMealDB'den çekilen popüler tarifler</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.meals != null && Model.meals.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            @foreach (var dish in Model.meals)
+            {
+                <div class="inset p-4 rounded-2xl border border-[#1e1e2e] bg-[#0c0a14] flex flex-col justify-between transition-all hover:border-[#34d399]/30">
+                    <div class="text-center mb-3">
+                        <img src="@dish.strMealThumb" style="width:100%; height:180px; border-radius:12px; object-fit:cover;" class="mb-2" />
+                        <h3 class="text-xs font-bold text-slate-200 truncate">@dish.strMeal</h3>
+                        @if (!string.IsNullOrEmpty(dish.strArea))
+                        {
+                            <p class="text-[11px] text-slate-500 mt-0.5">🌍 @dish.strArea</p>
+                        }
+                    </div>
+
+                    <div class="flex items-center justify-between border-t border-[#1e1e2e] pt-2 text-[11px] font-mono text-slate-400">
+                        <span>📂 @(dish.strCategory ?? "Genel")</span>
+                        @if (!string.IsNullOrEmpty(dish.strInstructions))
+                        {
+                            <span class="text-emerald-400">✓ Tarif Mevcut</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="p-8 text-center bg-[#111118] rounded-2xl border border-dashed border-[#1e1e2e]">
+            <p class="text-sm text-gray-500">Tarifler yüklenemedi.</p>
+        </div>
+    }
+</div>

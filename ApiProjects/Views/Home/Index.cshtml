@@ -1,0 +1,388 @@
+@model ApiProjects.Models.DefaultViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="page-header">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="font-display text-xl font-bold" style="color:#f1f5f9;" id="page-title">Tüm Widget'lar</h1>
+            <p style="color:#4b5563;font-size:13px;margin-top:2px;" id="page-sub">10 bileşen · Son güncelleme: <span id="last-update">az önce</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="nb-pill" onclick="toggleAllWidgets(true)" style="font-size:12px;">Tümünü Göster</button>
+            <button class="nb-pill" onclick="toggleAllWidgets(false)" style="font-size:12px;">Tümünü Gizle</button>
+        </div>
+    </div>
+</div>
+
+<div id="settings-panel" style="display:none;padding:16px 24px;">
+    <div class="card" style="animation:none;opacity:1;">
+        <p class="font-display font-bold text-base mb-1" style="color:#f1f5f9;">⚙️ Widget Görünürlük Yönetimi</p>
+        <p style="color:#64748b;font-size:13px;margin-bottom:20px;">Hangi widget'ların dashboardda görüneceğini buradan kontrol edebilirsin.</p>
+        <div id="widget-toggle-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+</div>
+
+<div id="grid-container">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="main-grid">
+
+        <div class="card acc-cyan sm:col-span-2 lg:col-span-1" data-card="weather">
+            <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#22d3ee;">🌤 Hava Durumu</p>
+
+            @if (Model != null && Model.WeatherInfo != null && Model.WeatherInfo.current != null)
+            {
+                var cur = Model.WeatherInfo.current;
+                var emoji = ApiProjects.Controllers.WeatherController.GetWeatherEmoji(cur.weathercode);
+                var desc = ApiProjects.Controllers.WeatherController.GetWeatherDescription(cur.weathercode);
+
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <p class="val font-display text-5xl font-bold" style="color:#f1f5f9;">@Math.Round(cur.temperature_2m)°</p>
+                        <p class="sub text-sm mt-0.5" style="color:#94a3b8;">@emoji @desc</p>
+                        <p class="ttl font-semibold text-sm mt-1" style="color:#f1f5f9;">İstanbul</p>
+                    </div>
+                    <div class="inset" style="width:68px;height:68px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:36px;">
+                        @emoji
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="inset" style="border-radius:8px;padding:8px 4px;">
+                        <p class="lbl text-xs" style="color:#64748b;">Nem</p>
+                        <p class="val text-sm font-semibold" style="color:#22d3ee;">%@cur.relativehumidity_2m</p>
+                    </div>
+                    <div class="inset" style="border-radius:8px;padding:8px 4px;">
+                        <p class="lbl text-xs" style="color:#64748b;">Rüzgar</p>
+                        <p class="val text-sm font-semibold" style="color:#22d3ee;">@Math.Round(cur.windspeed_10m) km/s</p>
+                    </div>
+                    <div class="inset" style="border-radius:8px;padding:8px 4px;">
+                        <p class="lbl text-xs" style="color:#64748b;">Detay</p>
+                        <a href="/Weather/Index" class="text-xs font-bold block text-[#22d3ee] hover:underline mt-0.5">Aç ↗</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-sm text-gray-500 mb-3">Hava durumu verisi yüklenemedi.</p>
+                    <a href="/Weather/Index" class="nb-pill text-xs inline-flex items-center gap-1" style="border-color: #22d3ee; color: #22d3ee;">
+                        🔄 Detayları Gör ve Yükle
+                    </a>
+                </div>
+            }
+        </div>
+
+        <div class="card acc-green flex flex-col justify-between" data-card="currency" style="min-height: 230px;">
+            <p class="lbl text-xs font-medium uppercase tracking-widest mb-2" style="color:#34d399;">💱 Döviz Kurları</p>
+            <div class="space-y-3 flex-1 flex flex-col justify-center">
+                @if (Model != null && Model.CurrencyInfo != null && Model.CurrencyInfo.rates != null)
+                {
+                    double usdTry = 0, eurRate = 0, gbpRate = 0;
+                    Model.CurrencyInfo.rates.TryGetValue("TRY", out usdTry);
+                    Model.CurrencyInfo.rates.TryGetValue("EUR", out eurRate);
+                    Model.CurrencyInfo.rates.TryGetValue("GBP", out gbpRate);
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="inset flex items-center justify-center rounded-lg text-sm" style="width:28px; height:28px;">🇺🇸</span>
+                            <div><p class="ttl text-xs font-semibold" style="color:#f1f5f9;">USD</p></div>
+                        </div>
+                        <div class="text-right flex items-center gap-2">
+                            <p class="val text-sm font-bold" style="color:#f1f5f9;">₺@usdTry.ToString("N2")</p>
+                        </div>
+                    </div>
+                    <div class="sep" style="height:1px;"></div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="inset flex items-center justify-center rounded-lg text-sm" style="width:28px; height:28px;">🇪🇺</span>
+                            <div><p class="ttl text-xs font-semibold" style="color:#f1f5f9;">EUR</p></div>
+                        </div>
+                        <div class="text-right flex items-center gap-2">
+                            <p class="val text-sm font-bold" style="color:#f1f5f9;">@eurRate.ToString("N4")</p>
+                        </div>
+                    </div>
+                }
+            </div>
+            <a href="/Currency/Index" class="text-[11px] font-bold block text-[#34d399] text-center hover:underline mt-2">Detay gör ↗</a>
+        </div>
+
+        <div class="card acc-purple flex flex-col justify-between" data-card="crypto" style="min-height: 230px;">
+            <p class="lbl text-xs font-medium uppercase tracking-widest mb-2" style="color:#a78bfa;">🪙 Kripto Para</p>
+            <div class="space-y-2 flex-1 overflow-hidden flex flex-col justify-center">
+                @if (Model != null && Model.CryptoInfo != null && Model.CryptoInfo.coins != null && Model.CryptoInfo.coins.Count > 0)
+                {
+                    var displayCoins = Model.CryptoInfo.coins.Take(2).ToList();
+
+                    foreach (var coin in displayCoins)
+                    {
+                        bool isUp = coin.price_change_percentage_24h >= 0;
+
+                        <div class="mb-1">
+                            <div class="flex items-center justify-between text-xs mb-1">
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <img src="@coin.image" style="width:18px;height:18px;border-radius:50%;" />
+                                    <p class="ttl font-semibold truncate text-[#f1f5f9]">@coin.symbol.ToUpper()</p>
+                                </div>
+                                <div class="text-right flex items-center gap-1.5">
+                                    <p class="val font-bold text-[#f1f5f9]">$@coin.current_price.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)</p>
+                                    <span class="text-[10px]" style="color: @(isUp ? "#34d399" : "#f87171")">@(isUp ? "▲" : "▼")@Math.Abs(coin.price_change_percentage_24h).ToString("N2")%</span>
+                                </div>
+                            </div>
+                            <div class="pbar"><div class="pfill" style="width: 50%; background:#a78bfa;"></div></div>
+                        </div>
+                    }
+                }
+            </div>
+            <a href="/Crypto/Index" class="text-[11px] font-bold block text-[#a78bfa] text-center hover:underline mt-2">Tüm Trendleri Keşfet ↗</a>
+        </div>
+
+        <div class="card acc-amber" data-card="fuel">
+            <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#fbbf24;">⛽ Akaryakıt Fiyatları</p>
+            <div class="space-y-3">
+                @if (Model != null && Model.FuelInfo != null && Model.FuelInfo.result != null)
+                {
+                    var turkeyData = Model.FuelInfo.result.Find(x => x.country == "Turkey");
+
+                    <div class="inset flex items-center justify-between p-3 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(251,191,36,.15);display:flex;align-items:center;justify-content:center;font-size:18px;">⛽</div>
+                            <div>
+                                <p class="ttl text-sm font-medium" style="color:#f1f5f9;">Benzin 95</p>
+                                <p class="lbl text-xs" style="color:#64748b;">Türkiye Canlı Veri</p>
+                            </div>
+                        </div>
+                        <p class="val font-display text-base font-bold" style="color:#fbbf24;">€ @(turkeyData?.gasoline ?? "0.00")</p>
+                    </div>
+
+                    <div class="inset flex items-center justify-between p-3 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(79,142,247,.15);display:flex;align-items:center;justify-content:center;font-size:18px;">🛢️</div>
+                            <div>
+                                <p class="ttl text-sm font-medium" style="color:#f1f5f9;">Motorin</p>
+                                <p class="lbl text-xs" style="color:#64748b;">Dizel Canlı Pompa</p>
+                            </div>
+                        </div>
+                        <p class="val font-display text-base font-bold" style="color:#4f8ef7;">€ @(turkeyData?.diesel ?? "0.00")</p>
+                    </div>
+                    
+                    <a href="/Fuel/Index" class="text-xs font-bold block text-[#fbbf24] text-center hover:underline mt-2">Avrupa Fiyat Endeksini Gör ↗</a>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <p class="text-xs text-gray-500 mb-2">Akaryakıt verileri yüklenemedi.</p>
+                        <a href="/Fuel/Index" class="nb-pill text-xs inline-flex items-center gap-1" style="border-color: #fbbf24; color: #fbbf24;">
+                            🔄 Canlı Endeksi Yükle
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card acc-blue sm:col-span-2" data-card="football">
+            <div class="flex items-center justify-between mb-2">
+                <p class="lbl text-xs font-medium uppercase tracking-widest" style="color:#4f8ef7;">⚽ Süper Lig Zirvesi</p>
+                <span class="badge" style="background:rgba(52,211,153,.12);color:#34d399;">● CANLI VERİ</span>
+            </div>
+            
+            <div class="space-y-2.5 my-3">
+                @if (Model != null && Model.FootballInfo != null && Model.FootballInfo.Count > 0)
+                {
+                    var topTeams = Model.FootballInfo.GetRange(0, Math.Min(3, Model.FootballInfo.Count));
+
+                    foreach (var row in topTeams)
+                    {
+                        <div class="inset flex items-center justify-between p-2 rounded-xl border border-[#1e1e2e]/40">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-slate-500 w-4">#@row.stats.rank</span>
+                                <img src="@row.team.logo" style="width:24px; height:24px; object-fit:contain;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/5323/5323814.png'" />
+                                <p class="ttl text-sm font-medium" style="color:#f1f5f9;">@row.team.name</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <span style="color:#64748b;">@row.stats.wins G / @row.stats.losses M</span>
+                                <span class="val font-bold text-[#4f8ef7]" style="font-size:14px;">@row.stats.points P</span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-xs text-gray-500 text-center py-4">Futbol verileri önbelleğe alınamadı.</p>
+                }
+            </div>
+            
+            <a href="/Football/Index" class="text-xs font-bold block text-[#4f8ef7] text-center hover:underline mt-1">Tüm Puan Durumu Tablosunu Aç ↗</a>
+        </div>
+
+        <div class="card acc-rose" data-card="movie">
+            <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#f43f5e;">🎬 Günün Filmi</p>
+            <div class="space-y-3">
+                @if (Model != null && Model.MovieInfo != null && Model.MovieInfo.results != null && Model.MovieInfo.results.Count > 0)
+                {
+                    var featuredMovie = Model.MovieInfo.results[0];
+                    var movieImg = "https://image.tmdb.org/t/p/w500" + featuredMovie.poster_path;
+
+                    <div class="inset flex gap-3 p-3 rounded-xl border border-[#1e1e2e]/40">
+                        <img src="@movieImg" style="width:60px; height:85px; border-radius:8px; object-fit:cover;" />
+                        <div class="flex-1 min-w-0 flex flex-col justify-between">
+                            <div>
+                                <p class="ttl text-sm font-bold truncate" style="color:#f1f5f9;">@featuredMovie.title</p>
+                                <p class="lbl text-xs text-slate-400 line-clamp-2 mt-0.5" style="font-size:11px;">@featuredMovie.overview</p>
+                            </div>
+                            <div class="flex items-center gap-1 text-[11px] font-bold text-[#fbbf24]">
+                                ⭐ @featuredMovie.vote_average.ToString("N1")
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="/Movie/Index" class="text-xs font-bold block text-[#f43f5e] text-center hover:underline mt-1">Popüler Filmleri Keşfet ↗</a>
+                }
+                else
+                {
+                    <p class="text-xs text-gray-500 text-center py-4">Günün filmi yüklenemedi.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card acc-purple" data-card="song">
+            <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#a78bfa;">🎵 Günün Şarkısı</p>
+            <div class="space-y-3">
+                @if (Model != null && Model.MusicInfo != null && Model.MusicInfo.data != null && Model.MusicInfo.data.Count > 0)
+                {
+                    var currentTrack = Model.MusicInfo.data[0];
+                    var coverUrl = !string.IsNullOrEmpty(currentTrack.album?.cover_medium)
+                                   ? currentTrack.album.cover_medium
+                                   : "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
+
+                    <div class="inset flex flex-col items-center p-4 rounded-xl text-center border border-[#1e1e2e]/40">
+                        <img src="@coverUrl" style="width:90px; height:90px; border-radius:12px; object-fit:cover; box-shadow: 0 8px 24px rgba(167,139,250,0.15);" class="mb-3" />
+                        <div>
+                            <p class="ttl text-sm font-bold truncate max-w-[200px]" style="color:#f1f5f9;">@currentTrack.title</p>
+                            <p class="lbl text-xs mt-0.5 truncate max-w-[200px]" style="color:#64748b;">@currentTrack.artist?.name</p>
+                        </div>
+                    </div>
+
+                    <a href="/Music/Index" class="text-xs font-bold block text-[#a78bfa] text-center hover:underline mt-1">Şarkı Detaylarını Gör ↗</a>
+                }
+                else
+                {
+                    <p class="text-xs text-gray-500 text-center py-4">Günün şarkısı yüklenemedi.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card acc-red sm:col-span-2" data-card="news">
+            <div class="flex items-center justify-between mb-3">
+                <p class="lbl text-xs font-medium uppercase tracking-widest" style="color:#f87171;">📰 Güncel Haberler</p>
+                <a href="/NewsItem/Index" class="text-xs text-slate-500 hover:text-slate-300">Tümünü Gör ↗</a>
+            </div>
+            
+            <div class="space-y-2.5">
+                @if (Model != null && Model.NewsInfo != null && Model.NewsInfo.Count > 0)
+                {
+                    var topNews = Model.NewsInfo.GetRange(0, Math.Min(3, Model.NewsInfo.Count));
+
+                    foreach (var item in topNews)
+                    {
+                        var safeUrl = item.url;
+                        if (safeUrl.Contains("https://www.sozcu.com.trhttps://"))
+                        {
+                            safeUrl = safeUrl.Replace("https://www.sozcu.com.trhttps://", "https://");
+                        }
+
+                        <div class="inset p-2.5 rounded-xl border border-[#1e1e2e]/40 flex justify-between items-center gap-2">
+                            <div class="min-w-0">
+                                <a href="@safeUrl" target="_blank" class="ttl text-xs font-medium text-slate-200 hover:text-[#f87171] truncate block">
+                                    @item.title
+                                </a>
+                                <span class="text-[9px] text-slate-500 font-mono">Kaynak: @item.source</span>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 font-bold flex-shrink-0">● Canlı</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-xs text-gray-500 text-center py-4">Güncel haberler yüklenemedi.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card acc-emerald" data-card="recipe">
+            <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#34d399;">🍳 Günün Tarifi</p>
+            <div class="space-y-3">
+                @if (Model != null && Model.RecipeInfo != null && Model.RecipeInfo.meals != null && Model.RecipeInfo.meals.Count > 0)
+                {
+                    var dailyDish = Model.RecipeInfo.meals[0];
+
+                    <div class="inset flex flex-col items-center p-3 rounded-xl text-center border border-[#1e1e2e]/40">
+                        <img src="@dailyDish.strMealThumb" style="width:100%; height:110px; border-radius:10px; object-fit:cover;" class="mb-2" />
+                        <div>
+                            <p class="ttl text-xs font-bold truncate max-w-[200px]" style="color:#f1f5f9;">@dailyDish.strMeal</p>
+                            <div class="flex justify-center gap-3 text-[10px] text-slate-500 font-mono mt-1">
+                                <span>📂 @(dailyDish.strCategory ?? "Genel")</span>
+                                <span>🌍 @(dailyDish.strArea ?? "")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="/Recipe/Index" class="text-xs font-bold block text-[#34d399] text-center hover:underline mt-1">Tarif Kitabını Aç ↗</a>
+                }
+                else
+                {
+                    <p class="text-xs text-gray-500 text-center py-4">Günün tarifi yüklenemedi.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card acc-cyan" data-card="quote">
+            <div class="flex items-center justify-between mb-3">
+                <p class="lbl text-xs font-medium uppercase tracking-widest" style="color:#22d3ee;">✍️ Günün Sözü</p>
+                <span class="badge" style="background:rgba(34,211,238,.12);color:#22d3ee;font-size:10px;">WISDOM</span>
+            </div>
+            
+            <div class="space-y-2">
+                @if (Model != null && Model.QuoteInfo != null && Model.QuoteInfo.Count > 0)
+                {
+                    var featuredQuote = Model.QuoteInfo[0];
+
+                    <div class="inset p-4 rounded-xl border border-[#1e1e2e]/40 flex flex-col justify-between min-h-[110px]">
+                        <p class="ttl text-xs italic font-medium leading-relaxed line-clamp-3 text-slate-300" style="font-size:11.5px;">
+                            “@featuredQuote.text”
+                        </p>
+                        <p class="text-right text-[10px] font-bold text-[#22d3ee] mt-2 border-t border-[#1e1e2e]/30 pt-1.5">
+                            ― @featuredQuote.author
+                        </p>
+                    </div>
+                    
+                    <a href="/Quote/Index" class="text-xs font-bold block text-[#22d3ee] text-center hover:underline mt-1">Daha Fazla Söz Keşfet ↗</a>
+                }
+                else
+                {
+                    <p class="text-xs text-gray-500 text-center py-4">Günün sözü yüklenemedi.</p>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const WIDGETS = [
+        { id: 'weather', label: 'Hava Durumu' },
+        { id: 'currency', label: 'Döviz Kurları' },
+        { id: 'crypto', label: 'Kripto Para' },
+        { id: 'fuel', label: 'Akaryakıt' },
+        { id: 'football', label: 'Futbol Maçı' },
+        { id: 'movie', label: 'Günün Filmi' },
+        { id: 'music', label: 'Günün Şarkısı' },
+        { id: 'news', label: 'Haberler' },
+        { id: 'recipe', label: 'Yemek Önerisi' },
+        { id: 'quote', label: 'Motivasyon' }
+    ];
+
+    function toggleAllWidgets(show) {
+        document.querySelectorAll('[data-card]').forEach(c => c.style.display = show ? '' : 'none');
+    }
+</script>

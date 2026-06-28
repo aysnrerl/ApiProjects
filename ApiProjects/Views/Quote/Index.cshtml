@@ -1,0 +1,33 @@
+﻿@model List<ApiProjects.Models.QuoteViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[800px] mx-auto animate-fadeUp">
+    
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">✍️ Günün İlham Veren Sözleri</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">Dünya düşünürlerinden ve yazarlarından derlenmiş canlı felsefi vecizeler</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="space-y-4">
+            @foreach (var item in Model)
+            {
+                <div class="inset p-5 rounded-2xl border border-[#1e1e2e] bg-[#0c0a14] relative overflow-hidden">
+                    <span class="text-6xl font-serif text-slate-800 absolute -top-2 left-2 select-none">“</span>
+                    <p class="text-sm italic text-slate-300 font-medium pl-6 relative z-10 leading-relaxed">
+                        @item.text
+                    </p>
+                    <div class="text-right mt-3 border-t border-[#1e1e2e]/60 pt-2">
+                        <span class="text-xs font-bold text-[#a78bfa]">― @item.author</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

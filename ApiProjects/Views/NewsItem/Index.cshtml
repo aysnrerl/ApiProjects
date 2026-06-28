@@ -1,0 +1,42 @@
+﻿@model List<ApiProjects.Models.NewsItemViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[900px] mx-auto animate-fadeUp">
+    
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">📰 Son Dakika Canlı Haberler</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">Ulusal basın kaynaklarından anlık çekilen güncel haber akışı</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="space-y-3">
+            @foreach (var item in Model)
+            {
+                <div class="inset p-4 rounded-xl border border-[#1e1e2e] bg-[#0c0a14] flex items-center justify-between gap-4 hover:border-slate-700/50 transition-all">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded">
+                            📢 @item.source
+                        </span>
+                        <h3 class="text-sm font-semibold text-slate-200 mt-1">@item.title</h3>
+                    </div>
+                    @{
+                        var safeUrl = item.url;
+                        if (safeUrl.Contains("https://www.sozcu.com.trhttps://"))
+                        {
+                            safeUrl = safeUrl.Replace("https://www.sozcu.com.trhttps://", "https://");
+                        }
+                    }
+                    <a href="@safeUrl" target="_blank" class="text-xs font-bold text-[#4f8ef7] hover:underline flex-shrink-0">
+                        Habere Git ↗
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</div>

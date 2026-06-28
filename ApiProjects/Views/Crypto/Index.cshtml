@@ -1,0 +1,50 @@
+@model ApiProjects.Models.CryptoViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[1200px] mx-auto animate-fadeUp">
+
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">🪙 Kripto Para Piyasası</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">Piyasa değerine göre sıralı en popüler 20 kripto para</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.coins != null && Model.coins.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @foreach (var coin in Model.coins)
+            {
+                bool isPositive = coin.price_change_percentage_24h >= 0;
+
+                <div class="inset p-4 rounded-2xl flex items-start justify-between gap-3 border border-[#1e1e2e] transition-all hover:border-[#a78bfa]/30">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <img src="@coin.image" style="width:34px; height:34px; flex-shrink:0; border-radius:50%; background:#111118; padding:4px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2272/2272662.png'" />
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold truncate" style="color:#f1f5f9; max-width:120px;">@coin.name</p>
+                            <p class="text-xs font-medium uppercase" style="color:#64748b;">@coin.symbol · #@coin.market_cap_rank</p>
+                        </div>
+                    </div>
+
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-sm font-semibold text-slate-200">
+                            $@coin.current_price.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)
+                        </p>
+                        <span class="badge text-[10px] mt-1" style="background: @(isPositive ? "rgba(52,211,153,.12)" : "rgba(248,113,113,.12)"); color: @(isPositive ? "#34d399" : "#f87171");">
+                            @(isPositive ? "▲" : "▼") @Math.Abs(coin.price_change_percentage_24h).ToString("N2")%
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="p-8 text-center bg-[#111118] rounded-2xl border border-dashed border-[#1e1e2e]">
+            <p class="text-sm text-gray-500">Kripto para listesi yüklenemedi.</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,54 @@
+﻿@model ApiProjects.Models.FuelViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[1200px] mx-auto animate-fadeUp">
+    
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">⛽ Avrupa Akaryakıt Fiyat Endeksi</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">Avrupa ülkeleri ve Türkiye'deki canlı akaryakıt litre fiyat listesi</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.success && Model.result != null && Model.result.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @foreach (var item in Model.result)
+            {
+                // Boş ülke isimlerini listelememek için filtre koyuyoruz
+                if (string.IsNullOrEmpty(item.country)) continue;
+
+                <div class="inset p-4 rounded-2xl border border-[#1e1e2e] transition-all hover:border-[#fbbf24]/30">
+                    <div class="flex items-center justify-between border-b border-[#1e1e2e] pb-2 mb-3">
+                        <span class="text-sm font-bold text-slate-200">🇪🇺 @item.country</span>
+                        <span class="text-[10px] uppercase font-mono text-slate-500">@item.currency / Lt</span>
+                    </div>
+                    
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span style="color:#64748b;">⛽ Benzin 95:</span>
+                            <span class="font-bold text-[#fbbf24]">€ @item.gasoline</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span style="color:#64748b;">🛢️ Motorin (Dizel):</span>
+                            <span class="font-bold text-[#4f8ef7]">€ @item.diesel</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span style="color:#64748b;">💨 LPG Otogaz:</span>
+                            <span class="font-bold text-[#34d399]">€ @item.lpg</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="p-8 text-center bg-[#111118] rounded-2xl border border-dashed border-[#1e1e2e]">
+            <p class="text-sm text-gray-500">Canlı akaryakıt verileri şu an yüklenemedi.</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,53 @@
+﻿@model List<ApiProjects.Models.FootballMatchViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[1000px] mx-auto animate-fadeUp">
+    
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">⚽ Trendyol Süper Lig Puan Durumu</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">Canlı API verileriyle güncel sezon sıralaması ve takım istatistikleri</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="overflow-x-auto rounded-2xl border border-[#1e1e2e] bg-[#0c0a14]">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-[#1e1e2e] bg-[#110f1d]" style="color:#64748b;">
+                        <th class="p-4 text-center w-12">#</th>
+                        <th class="p-4">Takım</th>
+                        <th class="p-4 text-center">OM</th>
+                        <th class="p-4 text-center">G</th>
+                        <th class="p-4 text-center">B</th>
+                        <th class="p-4 text-center">M</th>
+                        <th class="p-4 text-center">AV</th>
+                        <th class="p-4 text-center font-bold text-[#4f8ef7]">Puan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#1e1e2e]" style="color:#e2e8f0;">
+                    @foreach (var row in Model)
+                    {
+                        <tr class="hover:bg-[#161426]/50 transition-colors">
+                            <td class="p-4 text-center font-bold @(row.stats.rank <= 3 ? "text-[#34d399]" : "text-slate-500")">@row.stats.rank</td>
+                            <td class="p-4 flex items-center gap-3">
+                                <img src="@row.team.logo" style="width:26px; height:26px; object-fit:contain;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/5323/5323814.png'" />
+                                <span class="font-medium">@row.team.name</span>
+                            </td>
+                            <td class="p-4 text-center">@row.stats.gamesPlayed</td>
+                            <td class="p-4 text-center text-emerald-400">@row.stats.wins</td>
+                            <td class="p-4 text-center text-slate-400">@row.stats.ties</td>
+                            <td class="p-4 text-center text-rose-400">@row.stats.losses</td>
+                            <td class="p-4 text-center">@row.stats.goalDifference</td>
+                            <td class="p-4 text-center font-bold text-[#4f8ef7]">@row.stats.points</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

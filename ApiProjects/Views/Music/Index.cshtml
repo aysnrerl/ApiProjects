@@ -1,0 +1,45 @@
+@model ApiProjects.Models.MusicViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[900px] mx-auto animate-fadeUp">
+
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">🎵 Dünya Müzik Trendleri</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">Deezer Chart üzerinden anlık çekilen en popüler 10 parça</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.data != null && Model.data.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            @foreach (var track in Model.data)
+            {
+                var coverUrl = !string.IsNullOrEmpty(track.album?.cover_medium)
+                    ? track.album.cover_medium
+                    : "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
+
+                <div class="inset p-4 rounded-2xl flex items-center gap-4 border border-[#1e1e2e] hover:border-[#a78bfa]/30 transition-all">
+                    <img src="@coverUrl" style="width:60px; height:60px; border-radius:10px; object-fit:cover; flex-shrink:0;" />
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-bold truncate" style="color:#f1f5f9;">@track.title</p>
+                        <p class="text-xs truncate mt-0.5" style="color:#a78bfa;">🎤 @track.artist?.name</p>
+                        <p class="text-xs truncate mt-0.5" style="color:#64748b;">💿 @track.album?.title</p>
+                    </div>
+                    <div class="flex-shrink-0 text-right">
+                        <span class="badge text-[10px]" style="background:rgba(167,139,250,.12); color:#a78bfa;">#@track.rank</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="p-8 text-center bg-[#111118] rounded-2xl border border-dashed border-[#1e1e2e]">
+            <p class="text-sm text-gray-500">Müzik trendleri alınamadı. Deezer API'sine ulaşılamıyor olabilir.</p>
+        </div>
+    }
+</div>

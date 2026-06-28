@@ -1,0 +1,41 @@
+﻿@model ApiProjects.Models.MovieViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6 max-w-[1200px] mx-auto animate-fadeUp">
+    
+    <div class="mb-6 flex items-center justify-between border-b border-[#1e1e2e] pb-4">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight" style="color:#f1f5f9;">🎬 Günün Popüler Sinema Filmleri</h1>
+            <p style="color:#64748b; font-size:13px;" class="mt-1">TMDB Canlı altyapısı üzerinden anlık çekilen vizyon ve trend listesi</p>
+        </div>
+        <a href="/Home/Index" class="nb-pill text-xs">⊞ Panele Geri Dön</a>
+    </div>
+
+    @if (Model != null && Model.results != null && Model.results.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            @foreach (var movie in Model.results)
+            {
+                // TMDB resim sunucusunun orijinal ön eki ile afiş linkini bağlıyoruz
+                var imgUrl = !string.IsNullOrEmpty(movie.poster_path)
+                             ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+                             : "https://cdn-icons-png.flaticon.com/512/4221/4221419.png";
+
+                <div class="inset p-4 rounded-2xl border border-[#1e1e2e] bg-[#0c0a14] flex flex-col justify-between transition-all hover:border-[#f43f5e]/30">
+                    <div class="text-center mb-3">
+                        <img src="@imgUrl" style="width:100%; height:260px; border-radius:12px; object-fit:cover;" class="mb-2" />
+                        <h3 class="text-sm font-bold text-slate-200 truncate">@movie.title</h3>
+                        <p class="text-[11px] text-slate-500 font-mono mt-0.5">📅 @movie.release_date</p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between border-t border-[#1e1e2e] pt-2 text-xs">
+                        <span style="color:#64748b;">⭐ TMDB Puanı:</span>
+                        <span class="font-bold text-[#fbbf24]">@movie.vote_average.ToString("N1")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

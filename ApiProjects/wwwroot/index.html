@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Hub — Kişisel Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans:['Inter','sans-serif'], display:['Space Grotesk','sans-serif'] },
+          colors: {
+            dark:{ bg:'#0a0a0f', surface:'#111118', card:'#16161f', border:'#1e1e2e' },
+            neon:{ blue:'#4f8ef7', purple:'#a78bfa', cyan:'#22d3ee', green:'#34d399', pink:'#f472b6', amber:'#fbbf24' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;overflow:hidden;}
+    body{font-family:'Inter',sans-serif;background:#0a0a0f;display:flex;flex-direction:column;}
+    .font-display{font-family:'Space Grotesk',sans-serif;}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:#2a2a3e;border-radius:4px;}
+
+    /* ── SIDEBAR ── */
+    #sidebar{
+      width:240px;min-width:240px;
+      background:#0d0d15;
+      border-right:1px solid #1e1e2e;
+      display:flex;flex-direction:column;
+      transition:width .25s cubic-bezier(.4,0,.2,1), min-width .25s cubic-bezier(.4,0,.2,1);
+      overflow:hidden;
+      position:relative;
+      z-index:40;
+    }
+    #sidebar.collapsed{width:60px;min-width:60px;}
+
+    .sidebar-logo{
+      height:60px;display:flex;align-items:center;gap:12px;
+      padding:0 16px;border-bottom:1px solid #1e1e2e;flex-shrink:0;
+      overflow:hidden;white-space:nowrap;
+    }
+    .sidebar-logo-icon{
+      width:32px;min-width:32px;height:32px;border-radius:9px;
+      background:linear-gradient(135deg,#4f8ef7,#a78bfa);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .sidebar-logo-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#f1f5f9;transition:opacity .2s;}
+    #sidebar.collapsed .sidebar-logo-text{opacity:0;pointer-events:none;}
+
+    /* Nav items */
+    .sidebar-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 8px;}
+    .nav-section-title{
+      font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+      color:#374151;padding:10px 10px 4px;white-space:nowrap;
+      transition:opacity .2s;
+    }
+    #sidebar.collapsed .nav-section-title{opacity:0;}
+    .nav-item{
+      display:flex;align-items:center;gap:10px;
+      padding:9px 10px;border-radius:10px;cursor:pointer;
+      transition:background .15s;white-space:nowrap;overflow:hidden;
+      position:relative;text-decoration:none;
+    }
+    .nav-item:hover{background:#1a1a28;}
+    .nav-item.active{background:#1c1c30;}
+    .nav-item .nav-icon{
+      width:32px;min-width:32px;height:32px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;font-size:16px;
+      flex-shrink:0;background:#111118;transition:background .15s;
+    }
+    .nav-item.active .nav-icon{background:#1e1e3a;}
+    .nav-item:hover .nav-icon{background:#1a1a2a;}
+    .nav-label{font-size:13px;font-weight:500;color:#94a3b8;transition:color .15s,opacity .2s;}
+    .nav-item.active .nav-label{color:#f1f5f9;}
+    .nav-item:hover .nav-label{color:#e2e8f0;}
+    #sidebar.collapsed .nav-label{opacity:0;}
+
+    /* Active accent line */
+    .nav-item.active::before{
+      content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+      width:3px;height:20px;border-radius:0 3px 3px 0;
+    }
+    /* per-widget colors */
+    .nav-item[data-widget="weather"].active::before{background:#22d3ee;}
+    .nav-item[data-widget="currency"].active::before{background:#34d399;}
+    .nav-item[data-widget="crypto"].active::before{background:#a78bfa;}
+    .nav-item[data-widget="fuel"].active::before{background:#fbbf24;}
+    .nav-item[data-widget="football"].active::before{background:#4f8ef7;}
+    .nav-item[data-widget="movie"].active::before{background:#f472b6;}
+    .nav-item[data-widget="music"].active::before{background:#a78bfa;}
+    .nav-item[data-widget="news"].active::before{background:#f87171;}
+    .nav-item[data-widget="recipe"].active::before{background:#fbbf24;}
+    .nav-item[data-widget="quote"].active::before{background:#a78bfa;}
+
+    /* Tooltip on collapsed */
+    #sidebar.collapsed .nav-item:hover::after{
+      content:attr(data-tip);
+      position:absolute;left:62px;top:50%;transform:translateY(-50%);
+      background:#1e1e2e;color:#f1f5f9;font-size:12px;font-weight:500;
+      padding:5px 10px;border-radius:7px;white-space:nowrap;
+      border:1px solid #2a2a3e;z-index:999;pointer-events:none;
+    }
+
+    /* Sidebar bottom */
+    .sidebar-bottom{padding:10px 8px 14px;border-top:1px solid #1e1e2e;flex-shrink:0;}
+
+    /* ── NAVBAR ── */
+    #navbar{
+      height:60px;flex-shrink:0;
+      background:rgba(13,13,21,.92);
+      border-bottom:1px solid #1e1e2e;
+      backdrop-filter:blur(16px);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 20px;gap:16px;
+      position:relative;z-index:50;
+    }
+
+    /* Search */
+    .search-wrap{
+      flex:1;max-width:360px;
+      display:flex;align-items:center;gap:8px;
+      background:#111118;border:1px solid #1e1e2e;
+      border-radius:10px;padding:0 12px;height:36px;
+      transition:border-color .15s;
+    }
+    .search-wrap:focus-within{border-color:#4f8ef7;}
+    .search-wrap input{
+      flex:1;background:none;border:none;outline:none;
+      font-size:13px;color:#f1f5f9;font-family:'Inter',sans-serif;
+    }
+    .search-wrap input::placeholder{color:#4b5563;}
+
+    /* Navbar right pills */
+    .nb-pill{
+      display:flex;align-items:center;gap:6px;
+      background:#111118;border:1px solid #1e1e2e;
+      border-radius:10px;padding:0 12px;height:36px;
+      cursor:pointer;font-size:13px;color:#94a3b8;
+      transition:background .15s,border-color .15s;white-space:nowrap;
+    }
+    .nb-pill:hover{background:#1a1a28;border-color:#2a2a3e;color:#f1f5f9;}
+    .nb-pill .dot{width:7px;height:7px;border-radius:50%;background:#34d399;}
+    .nb-pill .dot.pulse{animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+    /* Avatar */
+    .avatar{
+      width:34px;height:34px;border-radius:50%;cursor:pointer;flex-shrink:0;
+      background:linear-gradient(135deg,#a78bfa,#4f8ef7);
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:700;color:white;
+      border:2px solid #1e1e2e;transition:border-color .15s;
+    }
+    .avatar:hover{border-color:#4f8ef7;}
+
+    /* Notification badge */
+    .nb-badge{position:relative;}
+    .nb-badge::after{
+      content:'3';position:absolute;top:-5px;right:-5px;
+      width:16px;height:16px;border-radius:50%;
+      background:#f87171;color:white;font-size:9px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+    }
+
+    /* ── LAYOUT SHELL ── */
+    #app{display:flex;flex:1;overflow:hidden;}
+    #content-area{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+    #page-header{padding:20px 24px 0;flex-shrink:0;}
+    #grid-container{flex:1;padding:16px 24px 24px;overflow-y:auto;}
+
+    /* ── CARDS ── */
+    .card{
+      background:#16161f;border:1px solid #1e1e2e;border-radius:16px;padding:20px;
+      transition:border-color .2s,transform .2s,opacity .3s;
+      animation:fadeUp .4s ease forwards;opacity:0;
+    }
+    .card:hover{border-color:#2e2e4a;transform:translateY(-2px);}
+    .card.hidden-card{display:none;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .card:nth-child(1){animation-delay:.04s;}.card:nth-child(2){animation-delay:.08s;}
+    .card:nth-child(3){animation-delay:.12s;}.card:nth-child(4){animation-delay:.16s;}
+    .card:nth-child(5){animation-delay:.20s;}.card:nth-child(6){animation-delay:.24s;}
+    .card:nth-child(7){animation-delay:.28s;}.card:nth-child(8){animation-delay:.32s;}
+    .card:nth-child(9){animation-delay:.36s;}.card:nth-child(10){animation-delay:.40s;}
+
+    .acc-blue  {border-top:2px solid #4f8ef7;}
+    .acc-purple{border-top:2px solid #a78bfa;}
+    .acc-cyan  {border-top:2px solid #22d3ee;}
+    .acc-green {border-top:2px solid #34d399;}
+    .acc-pink  {border-top:2px solid #f472b6;}
+    .acc-amber {border-top:2px solid #fbbf24;}
+    .acc-red   {border-top:2px solid #f87171;}
+
+    /* misc */
+    .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;}
+    .pbar{height:3px;border-radius:999px;background:#1e1e2e;overflow:hidden;}
+    .pfill{height:100%;border-radius:999px;}
+    .scorebox{background:#0a0a0f;border:1px solid #1e1e2e;border-radius:12px;padding:10px 20px;}
+    .mbar{height:4px;border-radius:999px;background:#1e1e2e;position:relative;cursor:pointer;}
+    .mfill{height:100%;width:38%;border-radius:999px;background:linear-gradient(90deg,#a78bfa,#4f8ef7);}
+    .mdot{width:10px;height:10px;border-radius:50%;background:#fff;position:absolute;top:50%;transform:translateY(-50%);left:36%;box-shadow:0 0 6px rgba(167,139,250,.7);}
+    .inset{background:#0a0a0f;border:1px solid #1e1e2e;}
+    .sep{background:#1e1e2e;}
+
+    /* Toggle pill (theme) */
+    .tog{width:44px;height:24px;border-radius:12px;background:#1e1e2e;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+    .tog-k{width:18px;height:18px;border-radius:50%;background:#4f8ef7;position:absolute;top:3px;left:3px;transition:transform .2s;}
+    html.light .tog-k{transform:translateX(20px);background:#fbbf24;}
+
+    /* Breadcrumb */
+    .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:#4b5563;}
+    .breadcrumb span{color:#94a3b8;}
+    .breadcrumb .active-crumb{color:#f1f5f9;font-weight:500;}
+
+    /* Widget toggle switch */
+    .widget-tog{
+      width:34px;height:18px;border-radius:9px;background:#1e1e2e;
+      position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;
+    }
+    .widget-tog.on{background:#4f8ef7;}
+    .widget-tog::after{
+      content:'';width:14px;height:14px;border-radius:50%;background:#fff;
+      position:absolute;top:2px;left:2px;transition:transform .2s;
+    }
+    .widget-tog.on::after{transform:translateX(16px);}
+
+    /* ── LIGHT MODE ── */
+    html.light body{background:#f0f4ff;}
+    html.light #sidebar{background:#fafbff;border-color:#e2e8f0;}
+    html.light #navbar{background:rgba(250,251,255,.92);border-color:#e2e8f0;}
+    html.light .nav-item:hover{background:#f0f4ff;}
+    html.light .nav-item.active{background:#eff0ff;}
+    html.light .nav-label{color:#64748b;}
+    html.light .nav-item.active .nav-label{color:#1e293b;}
+    html.light .nav-item .nav-icon{background:#f0f4ff;}
+    html.light .nav-item.active .nav-icon{background:#e8eaff;}
+    html.light .card{background:#fff;border-color:#e2e8f0;}
+    html.light .card:hover{border-color:#c7d2fe;}
+    html.light .search-wrap{background:#f0f4ff;border-color:#e2e8f0;}
+    html.light .search-wrap input{color:#1e293b;}
+    html.light .search-wrap input::placeholder{color:#9ca3af;}
+    html.light .nb-pill{background:#f0f4ff;border-color:#e2e8f0;color:#64748b;}
+    html.light .nb-pill:hover{background:#e8eaff;color:#1e293b;}
+    html.light .scorebox{background:#f8fafc;border-color:#e2e8f0;}
+    html.light .pbar,.html.light .mbar{background:#e2e8f0;}
+    html.light .inset{background:#f8fafc!important;border-color:#e2e8f0!important;}
+    html.light .sep{background:#e2e8f0!important;}
+    html.light .lbl{color:#64748b!important;}
+    html.light .val{color:#0f172a!important;}
+    html.light .ttl{color:#1e293b!important;}
+    html.light .sub{color:#64748b!important;}
+    html.light .breadcrumb{color:#94a3b8;}
+    html.light .breadcrumb .active-crumb{color:#1e293b;}
+    html.light .nav-section-title{color:#9ca3af;}
+    html.light .sidebar-bottom{border-color:#e2e8f0;}
+    html.light .sidebar-logo{border-color:#e2e8f0;}
+    html.light #sidebar.collapsed .nav-item:hover::after{background:#1e293b;color:#f1f5f9;border-color:#e2e8f0;}
+    html.light .widget-tog{background:#cbd5e1;}
+    html.light .quote-card{background:linear-gradient(135deg,#f0eeff,#ede8ff)!important;border-color:#c4b5fd!important;}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ TOP NAVBAR ═══════════ -->
+<nav id="navbar">
+  <!-- Left: hamburger + logo text -->
+  <div class="flex items-center gap-3 flex-shrink-0">
+    <button id="sidebar-toggle"
+      style="width:36px;height:36px;border-radius:9px;background:#111118;border:1px solid #1e1e2e;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;flex-shrink:0;"
+      onmouseover="this.style.background='#1a1a28'" onmouseout="this.style.background='#111118'">
+      <svg id="hamburger-icon" width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round">
+        <line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/>
+      </svg>
+    </button>
+    <div class="hidden sm:flex items-center gap-2">
+      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#4f8ef7,#a78bfa);display:flex;align-items:center;justify-content:center;">
+        <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round">
+          <rect x="2" y="2" width="4.5" height="4.5" rx="1"/><rect x="8.5" y="2" width="4.5" height="4.5" rx="1"/>
+          <rect x="2" y="8.5" width="4.5" height="4.5" rx="1"/><rect x="8.5" y="8.5" width="4.5" height="4.5" rx="1"/>
+        </svg>
+      </div>
+      <span class="font-display font-bold text-sm" style="color:#f1f5f9;">Daily Hub</span>
+      <span style="color:#374151;font-size:14px;">·</span>
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <span>Panel</span>
+        <span style="color:#374151;">›</span>
+        <span class="active-crumb" id="breadcrumb-label">Tüm Widget'lar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center: Search -->
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="#4b5563" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><line x1="9.5" y1="9.5" x2="13" y2="13"/></svg>
+    <input type="text" placeholder="Widget ara veya komut gir..." id="search-input"/>
+    <span style="font-size:11px;color:#374151;border:1px solid #1e1e2e;border-radius:5px;padding:1px 6px;">⌘K</span>
+  </div>
+
+  <!-- Right -->
+  <div class="flex items-center gap-2 flex-shrink-0">
+    <!-- Live dot -->
+    <div class="nb-pill hidden sm:flex">
+      <div class="dot pulse"></div>
+      <span id="nav-clock">--:--</span>
+    </div>
+
+    <!-- Refresh -->
+    <button class="nb-pill" onclick="refreshAll()" title="Verileri yenile">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 4a6 6 0 0 1 10.5-1M13 8A6 6 0 0 1 2.5 9"/><polyline points="1 1 1 4 4 4"/><polyline points="13 11 13 8 10 8"/></svg>
+      <span class="hidden md:inline">Yenile</span>
+    </button>
+
+    <!-- Notification -->
+    <button class="nb-pill nb-badge" title="Bildirimler">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 1a4 4 0 0 1 4 4c0 3 1.5 4 1.5 4H.5S2 8 2 5a4 4 0 0 1 4-4zM4.5 9a1.5 1.5 0 0 0 3 0"/></svg>
+    </button>
+
+    <!-- Theme -->
+    <div class="tog" onclick="toggleTheme()"><div class="tog-k"></div></div>
+
+    <!-- Avatar -->
+    <div class="avatar" title="Profil">AY</div>
+  </div>
+</nav>
+
+<!-- ═══════════ BODY ROW ═══════════ -->
+<div id="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside id="sidebar">
+    <!-- Logo (sidebar top) -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round">
+          <rect x="2" y="2" width="5" height="5" rx="1.2"/><rect x="11" y="2" width="5" height="5" rx="1.2"/>
+          <rect x="2" y="11" width="5" height="5" rx="1.2"/><rect x="11" y="11" width="5" height="5" rx="1.2"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-text">Kişisel Panel</span>
+    </div>
+
+    <!-- Nav -->
+    <div class="sidebar-nav">
+      <p class="nav-section-title">Genel</p>
+      <a class="nav-item active" data-widget="all" data-tip="Tüm Widget'lar" onclick="filterWidget('all',this)">
+        <div class="nav-icon" style="font-size:15px;">⊞</div>
+        <span class="nav-label">Tüm Widget'lar</span>
+      </a>
+
+      <p class="nav-section-title" style="margin-top:6px;">Veriler</p>
+
+      <a class="nav-item" data-widget="weather" data-tip="Hava Durumu" onclick="filterWidget('weather',this)">
+        <div class="nav-icon">🌤</div>
+        <span class="nav-label">Hava Durumu</span>
+      </a>
+      <a class="nav-item" data-widget="currency" data-tip="Döviz Kurları" onclick="filterWidget('currency',this)">
+        <div class="nav-icon">💱</div>
+        <span class="nav-label">Döviz Kurları</span>
+      </a>
+      <a class="nav-item" data-widget="crypto" data-tip="Kripto Para" onclick="filterWidget('crypto',this)">
+        <div class="nav-icon">🪙</div>
+        <span class="nav-label">Kripto Para</span>
+      </a>
+      <a class="nav-item" data-widget="fuel" data-tip="Akaryakıt" onclick="filterWidget('fuel',this)">
+        <div class="nav-icon">⛽</div>
+        <span class="nav-label">Akaryakıt</span>
+      </a>
+      <a class="nav-item" data-widget="football" data-tip="Futbol Maçı" onclick="filterWidget('football',this)">
+        <div class="nav-icon">⚽</div>
+        <span class="nav-label">Futbol Maçı</span>
+      </a>
+
+      <p class="nav-section-title" style="margin-top:6px;">Medya</p>
+
+      <a class="nav-item" data-widget="movie" data-tip="Günün Filmi" onclick="filterWidget('movie',this)">
+        <div class="nav-icon">🎬</div>
+        <span class="nav-label">Günün Filmi</span>
+      </a>
+      <a class="nav-item" data-widget="music" data-tip="Günün Şarkısı" onclick="filterWidget('music',this)">
+        <div class="nav-icon">🎵</div>
+        <span class="nav-label">Günün Şarkısı</span>
+      </a>
+      <a class="nav-item" data-widget="news" data-tip="Haberler" onclick="filterWidget('news',this)">
+        <div class="nav-icon">📰</div>
+        <span class="nav-label">Haberler</span>
+      </a>
+      <a class="nav-item" data-widget="recipe" data-tip="Yemek Önerisi" onclick="filterWidget('recipe',this)">
+        <div class="nav-icon">🍝</div>
+        <span class="nav-label">Yemek Önerisi</span>
+      </a>
+      <a class="nav-item" data-widget="quote" data-tip="Motivasyon Sözü" onclick="filterWidget('quote',this)">
+        <div class="nav-icon">💬</div>
+        <span class="nav-label">Motivasyon Sözü</span>
+      </a>
+
+      <p class="nav-section-title" style="margin-top:6px;">Yönetim</p>
+      <a class="nav-item" data-widget="settings" data-tip="Widget Ayarları" onclick="filterWidget('settings',this)">
+        <div class="nav-icon">⚙️</div>
+        <span class="nav-label">Widget Ayarları</span>
+      </a>
+    </div>
+
+    <!-- Sidebar bottom -->
+    <div class="sidebar-bottom">
+      <div class="nav-item" style="gap:10px;">
+        <div class="nav-icon" style="font-size:15px;">AY</div>
+        <div style="overflow:hidden;flex:1;">
+          <p class="nav-label" style="font-size:12px;color:#f1f5f9;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ayşe Yılmaz</p>
+          <p style="font-size:11px;color:#4b5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Pro Plan</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ CONTENT AREA ═══════════ -->
+  <div id="content-area">
+    <!-- Page header -->
+    <div id="page-header">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="font-display text-xl font-bold" style="color:#f1f5f9;" id="page-title">Tüm Widget'lar</h1>
+          <p style="color:#4b5563;font-size:13px;margin-top:2px;" id="page-sub">10 bileşen · Son güncelleme: <span id="last-update">az önce</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="nb-pill" onclick="toggleAllWidgets(true)" style="font-size:12px;">Tümünü Göster</button>
+          <button class="nb-pill" onclick="toggleAllWidgets(false)" style="font-size:12px;">Tümünü Gizle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANEL (hidden by default) -->
+    <div id="settings-panel" style="display:none;padding:16px 24px;">
+      <div class="card" style="animation:none;opacity:1;">
+        <p class="font-display font-bold text-base mb-1" style="color:#f1f5f9;">⚙️ Widget Görünürlük Yönetimi</p>
+        <p style="color:#64748b;font-size:13px;margin-bottom:20px;">Hangi widget'ların dashboardda görüneceğini buradan kontrol edebilirsin.</p>
+        <div id="widget-toggle-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div id="grid-container">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="main-grid">
+
+        <!-- ① HAVA DURUMU -->
+        <div class="card acc-cyan sm:col-span-2 lg:col-span-1" data-card="weather">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#22d3ee;">🌤 Hava Durumu</p>
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <p class="val font-display text-5xl font-bold" style="color:#f1f5f9;">18°</p>
+              <p class="sub text-sm mt-0.5" style="color:#94a3b8;">Parçalı Bulutlu</p>
+              <p class="ttl font-semibold text-sm mt-1" style="color:#f1f5f9;">İstanbul, TR</p>
+            </div>
+            <div class="inset" style="width:68px;height:68px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:36px;">⛅</div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="inset" style="border-radius:8px;padding:8px 4px;"><p class="lbl text-xs" style="color:#64748b;">Nem</p><p class="val text-sm font-semibold" style="color:#22d3ee;">65%</p></div>
+            <div class="inset" style="border-radius:8px;padding:8px 4px;"><p class="lbl text-xs" style="color:#64748b;">Rüzgar</p><p class="val text-sm font-semibold" style="color:#22d3ee;">14km/s</p></div>
+            <div class="inset" style="border-radius:8px;padding:8px 4px;"><p class="lbl text-xs" style="color:#64748b;">Hissedilen</p><p class="val text-sm font-semibold" style="color:#22d3ee;">16°</p></div>
+          </div>
+          <div class="flex justify-between mt-2 text-xs lbl" style="color:#64748b;"><span>↓ 12°C</span><span>↑ 22°C</span></div>
+        </div>
+
+        <!-- ② DÖVİZ -->
+        <div class="card acc-green" data-card="currency">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#34d399;">💱 Döviz Kurları</p>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="inset" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">🇺🇸</span>
+                <div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">USD</p><p class="lbl text-xs" style="color:#64748b;">Dolar</p></div>
+              </div>
+              <div class="text-right"><p class="val text-sm font-semibold" style="color:#f1f5f9;">₺32.50</p><span class="badge" style="background:rgba(52,211,153,.12);color:#34d399;">▲ 0.23%</span></div>
+            </div>
+            <div class="sep" style="height:1px;"></div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="inset" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">🇪🇺</span>
+                <div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">EUR</p><p class="lbl text-xs" style="color:#64748b;">Euro</p></div>
+              </div>
+              <div class="text-right"><p class="val text-sm font-semibold" style="color:#f1f5f9;">₺35.12</p><span class="badge" style="background:rgba(248,113,113,.12);color:#f87171;">▼ 0.11%</span></div>
+            </div>
+            <div class="sep" style="height:1px;"></div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="inset" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">🇬🇧</span>
+                <div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">GBP</p><p class="lbl text-xs" style="color:#64748b;">Sterlin</p></div>
+              </div>
+              <div class="text-right"><p class="val text-sm font-semibold" style="color:#f1f5f9;">₺41.80</p><span class="badge" style="background:rgba(52,211,153,.12);color:#34d399;">▲ 0.54%</span></div>
+            </div>
+            <div class="sep" style="height:1px;"></div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="inset" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">🥇</span>
+                <div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">Altın</p><p class="lbl text-xs" style="color:#64748b;">Gram</p></div>
+              </div>
+              <div class="text-right"><p class="val text-sm font-semibold" style="color:#f1f5f9;">₺2.840</p><span class="badge" style="background:rgba(251,191,36,.12);color:#fbbf24;">▲ 1.02%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ③ KRİPTO -->
+        <div class="card acc-purple" data-card="crypto">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#a78bfa;">🪙 Kripto Para</p>
+          <div class="space-y-4">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2"><span style="width:30px;height:30px;border-radius:8px;background:rgba(251,191,36,.15);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fbbf24;">₿</span><div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">Bitcoin</p><p class="lbl text-xs" style="color:#64748b;">BTC</p></div></div>
+                <div class="text-right"><p class="val text-sm font-semibold" style="color:#f1f5f9;">$67,420</p><span class="badge" style="background:rgba(52,211,153,.12);color:#34d399;">▲ 2.34%</span></div>
+              </div>
+              <div class="pbar"><div class="pfill" style="width:74%;background:#fbbf24;"></div></div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2"><span style="width:30px;height:30px;border-radius:8px;background:rgba(167,139,250,.15);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#a78bfa;">Ξ</span><div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">Ethereum</p><p class="lbl text-xs" style="color:#64748b;">ETH</p></div></div>
+                <div class="text-right"><p class="val text-sm font-semibold" style="color:#f1f5f9;">$3,540</p><span class="badge" style="background:rgba(248,113,113,.12);color:#f87171;">▼ 0.87%</span></div>
+              </div>
+              <div class="pbar"><div class="pfill" style="width:55%;background:#a78bfa;"></div></div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2"><span style="width:30px;height:30px;border-radius:8px;background:rgba(34,211,238,.15);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#22d3ee;">◎</span><div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">Solana</p><p class="lbl text-xs" style="color:#64748b;">SOL</p></div></div>
+                <div class="text-right"><p class="val text-sm font-semibold" style="color:#f1f5f9;">$178.60</p><span class="badge" style="background:rgba(52,211,153,.12);color:#34d399;">▲ 4.11%</span></div>
+              </div>
+              <div class="pbar"><div class="pfill" style="width:42%;background:#22d3ee;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ④ AKARYAKIT -->
+        <div class="card acc-amber" data-card="fuel">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#fbbf24;">⛽ Akaryakıt</p>
+          <div class="space-y-3">
+            <div class="inset flex items-center justify-between p-3 rounded-xl"><div class="flex items-center gap-2"><div style="width:36px;height:36px;border-radius:10px;background:rgba(251,191,36,.15);display:flex;align-items:center;justify-content:center;font-size:18px;">⛽</div><div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">Benzin 95</p><p class="lbl text-xs" style="color:#64748b;">Güncel fiyat</p></div></div><p class="val font-display text-lg font-bold" style="color:#fbbf24;">₺44.21</p></div>
+            <div class="inset flex items-center justify-between p-3 rounded-xl"><div class="flex items-center gap-2"><div style="width:36px;height:36px;border-radius:10px;background:rgba(79,142,247,.15);display:flex;align-items:center;justify-content:center;font-size:18px;">🛢️</div><div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">Motorin</p><p class="lbl text-xs" style="color:#64748b;">Dizel</p></div></div><p class="val font-display text-lg font-bold" style="color:#4f8ef7;">₺42.07</p></div>
+            <div class="inset flex items-center justify-between p-3 rounded-xl"><div class="flex items-center gap-2"><div style="width:36px;height:36px;border-radius:10px;background:rgba(52,211,153,.15);display:flex;align-items:center;justify-content:center;font-size:18px;">🌿</div><div><p class="ttl text-sm font-medium" style="color:#f1f5f9;">LPG</p><p class="lbl text-xs" style="color:#64748b;">Otogaz</p></div></div><p class="val font-display text-lg font-bold" style="color:#34d399;">₺19.84</p></div>
+          </div>
+        </div>
+
+        <!-- ⑤ FUTBOL -->
+        <div class="card acc-blue sm:col-span-2" data-card="football">
+          <div class="flex items-center justify-between mb-1">
+            <p class="lbl text-xs font-medium uppercase tracking-widest" style="color:#4f8ef7;">⚽ Maç Sonucu</p>
+            <span class="badge" style="background:rgba(248,113,113,.15);color:#f87171;">● CANLI</span>
+          </div>
+          <p class="lbl text-xs mb-4" style="color:#64748b;">Süper Lig · 28. Hafta</p>
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex flex-col items-center gap-2 flex-1"><div class="inset" style="width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;">🦅</div><p class="ttl text-sm font-semibold text-center" style="color:#f1f5f9;">Beşiktaş</p></div>
+            <div class="scorebox flex flex-col items-center"><div class="flex items-center gap-3"><span class="font-display text-4xl font-bold" style="color:#f1f5f9;">2</span><span class="text-xl font-bold" style="color:#64748b;">–</span><span class="font-display text-4xl font-bold" style="color:#f1f5f9;">1</span></div><span class="lbl text-xs mt-1" style="color:#64748b;">67'</span></div>
+            <div class="flex flex-col items-center gap-2 flex-1"><div class="inset" style="width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;">🦁</div><p class="ttl text-sm font-semibold text-center" style="color:#f1f5f9;">Galatasaray</p></div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+            <div style="height:4px;flex:2;border-radius:999px;background:#4f8ef7;"></div>
+            <span class="lbl text-xs" style="color:#64748b;">Top Hakimiyeti</span>
+            <div style="height:4px;flex:1;border-radius:999px;background:#f87171;"></div>
+          </div>
+          <div class="flex justify-between text-xs mt-1 lbl" style="color:#64748b;"><span>67%</span><span>33%</span></div>
+        </div>
+
+        <!-- ⑥ FİLM -->
+        <div class="card acc-pink" data-card="movie">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#f472b6;">🎬 Günün Filmi</p>
+          <div class="flex gap-3">
+            <div class="inset" style="width:76px;min-width:76px;height:108px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:30px;">🎥</div>
+            <div class="flex-1">
+              <p class="ttl font-display font-bold text-base leading-tight" style="color:#f1f5f9;">Dune: Part Two</p>
+              <div class="flex flex-wrap gap-1 mt-1.5"><span class="badge" style="background:rgba(251,191,36,.12);color:#fbbf24;">⭐ 8.5</span><span class="badge" style="background:#1e1e2e;color:#94a3b8;">166 dk</span></div>
+              <p class="sub text-xs mt-2 leading-relaxed" style="color:#94a3b8;">Paul Atreides Fremenlerle güçlerini birleştirerek yıkıcı bir savaşa hazırlanır...</p>
+              <div class="flex gap-1 mt-2 flex-wrap"><span class="badge" style="background:rgba(244,114,182,.12);color:#f472b6;">Sci-Fi</span><span class="badge" style="background:rgba(244,114,182,.12);color:#f472b6;">Aksiyon</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⑦ MÜZİK -->
+        <div class="card acc-purple" data-card="music">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#a78bfa;">🎵 Günün Şarkısı</p>
+          <div class="flex gap-3 mb-4">
+            <div class="inset" style="width:62px;min-width:62px;height:62px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;">🎧</div>
+            <div><p class="ttl font-display font-bold text-base" style="color:#f1f5f9;">Espresso</p><p class="sub text-sm" style="color:#94a3b8;">Sabrina Carpenter</p><p class="lbl text-xs mt-0.5" style="color:#64748b;">Short n' Sweet · 2024</p></div>
+          </div>
+          <div class="flex justify-between text-xs lbl mb-1" style="color:#64748b;"><span>1:12</span><span>3:05</span></div>
+          <div class="mbar mb-3"><div class="mfill"></div><div class="mdot"></div></div>
+          <div class="flex items-center justify-center gap-5">
+            <button style="color:#64748b;font-size:20px;background:none;border:none;cursor:pointer;">⏮</button>
+            <button style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#4f8ef7);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-size:15px;">▶</button>
+            <button style="color:#64748b;font-size:20px;background:none;border:none;cursor:pointer;">⏭</button>
+            <button style="color:#f472b6;font-size:18px;background:none;border:none;cursor:pointer;">♥</button>
+          </div>
+        </div>
+
+        <!-- ⑧ HABERLER -->
+        <div class="card acc-red" data-card="news">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#f87171;">📰 Güncel Haberler</p>
+          <div class="space-y-3">
+            <div class="pb-3" style="border-bottom:1px solid #1e1e2e;"><span class="badge mb-1" style="background:rgba(248,113,113,.12);color:#f87171;">Teknoloji</span><p class="ttl text-sm font-medium leading-snug" style="color:#f1f5f9;">Yapay Zeka Çağında Siber Güvenlik: Yeni Tehditler</p><p class="lbl text-xs mt-1" style="color:#64748b;">TechCrunch · 2 saat önce</p></div>
+            <div class="pb-3" style="border-bottom:1px solid #1e1e2e;"><span class="badge mb-1" style="background:rgba(52,211,153,.12);color:#34d399;">Ekonomi</span><p class="ttl text-sm font-medium leading-snug" style="color:#f1f5f9;">Merkez Bankası Faiz Kararını Açıkladı</p><p class="lbl text-xs mt-1" style="color:#64748b;">Bloomberg · 4 saat önce</p></div>
+            <div><span class="badge mb-1" style="background:rgba(167,139,250,.12);color:#a78bfa;">Bilim</span><p class="ttl text-sm font-medium leading-snug" style="color:#f1f5f9;">James Webb Teleskobu Yeni Bir Gezegen Keşfetti</p><p class="lbl text-xs mt-1" style="color:#64748b;">NASA · 6 saat önce</p></div>
+          </div>
+        </div>
+
+        <!-- ⑨ YEMEK -->
+        <div class="card acc-amber" data-card="recipe">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-3" style="color:#fbbf24;">🍝 Günün Yemeği</p>
+          <div class="inset" style="height:96px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:46px;margin-bottom:12px;">🍜</div>
+          <p class="ttl font-display font-bold text-base" style="color:#f1f5f9;">Kremalı Mantar Çorbası</p>
+          <div class="flex flex-wrap gap-1 mt-1.5"><span class="badge" style="background:rgba(251,191,36,.12);color:#fbbf24;">⏱ 30 dk</span><span class="badge" style="background:rgba(52,211,153,.12);color:#34d399;">4 kişilik</span><span class="badge" style="background:rgba(248,113,113,.12);color:#f87171;">Kolay</span></div>
+          <p class="sub text-xs mt-2 leading-relaxed" style="color:#94a3b8;">Taze mantar, krema ve kekikle kadifemsi bir çorba.</p>
+          <div class="flex flex-wrap gap-1 mt-2"><span class="badge" style="background:#1e1e2e;color:#94a3b8;">🍄 Mantar</span><span class="badge" style="background:#1e1e2e;color:#94a3b8;">🥛 Krema</span><span class="badge" style="background:#1e1e2e;color:#94a3b8;">🧅 Soğan</span></div>
+        </div>
+
+        <!-- ⑩ MOTİVASYON -->
+        <div class="card sm:col-span-2 xl:col-span-2 quote-card" data-card="quote"
+             style="background:linear-gradient(135deg,#0e0a1e,#120e24);border-color:#2a2040;">
+          <p class="lbl text-xs font-medium uppercase tracking-widest mb-4" style="color:#a78bfa;">💬 Günün Sözü</p>
+          <div class="flex gap-4 items-start">
+            <div style="font-size:56px;line-height:.8;color:#a78bfa;font-family:Georgia,serif;opacity:.45;flex-shrink:0;">"</div>
+            <div>
+              <p class="ttl font-display text-lg font-medium leading-relaxed" style="color:#e2d9ff;">Başarı, her gün tekrarlanan küçük çabaların toplamıdır. Bugün attığın her adım, yarının zirvesindir.</p>
+              <div class="flex items-center gap-3 mt-4">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#4f8ef7);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;">R</div>
+                <div><p class="ttl text-sm font-semibold" style="color:#c4b5fd;">Robert Collier</p><p class="lbl text-xs" style="color:#64748b;">Yazar & Motivasyon Konuşmacısı</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /grid -->
+
+      <div class="mt-6 pb-6 text-center text-xs" style="color:#374151;">
+        Daily Hub · RapidAPI Dashboard · Tüm veriler RapidAPI üzerinden çekilmektedir
+      </div>
+    </div><!-- /grid-container -->
+  </div><!-- /content-area -->
+</div><!-- /app -->
+
+<script>
+// ─── WIDGET METADATA ───────────────────────────────────────────────
+const WIDGETS = [
+  {id:'weather', label:'Hava Durumu',    icon:'🌤', color:'#22d3ee'},
+  {id:'currency',label:'Döviz Kurları', icon:'💱', color:'#34d399'},
+  {id:'crypto',  label:'Kripto Para',   icon:'🪙', color:'#a78bfa'},
+  {id:'fuel',    label:'Akaryakıt',     icon:'⛽', color:'#fbbf24'},
+  {id:'football',label:'Futbol Maçı',   icon:'⚽', color:'#4f8ef7'},
+  {id:'movie',   label:'Günün Filmi',   icon:'🎬', color:'#f472b6'},
+  {id:'music',   label:'Günün Şarkısı', icon:'🎵', color:'#a78bfa'},
+  {id:'news',    label:'Haberler',      icon:'📰', color:'#f87171'},
+  {id:'recipe',  label:'Yemek Önerisi', icon:'🍝', color:'#fbbf24'},
+  {id:'quote',   label:'Motivasyon',    icon:'💬', color:'#a78bfa'},
+];
+
+// Visibility state
+const visibility = {};
+WIDGETS.forEach(w => visibility[w.id] = true);
+
+// ─── CLOCK ─────────────────────────────────────────────────────────
+function tick(){
+  const n=new Date();
+  const el=document.getElementById('nav-clock');
+  if(el) el.textContent=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+}
+tick(); setInterval(tick,30000);
+
+// ─── THEME ─────────────────────────────────────────────────────────
+function toggleTheme(){
+  document.documentElement.classList.toggle('dark');
+  document.documentElement.classList.toggle('light');
+}
+
+// ─── SIDEBAR TOGGLE ────────────────────────────────────────────────
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-toggle').addEventListener('click',()=>{
+  sidebar.classList.toggle('collapsed');
+});
+
+// ─── SEARCH ────────────────────────────────────────────────────────
+document.getElementById('search-input').addEventListener('input', function(){
+  const q = this.value.toLowerCase();
+  if(!q){ filterWidget('all', document.querySelector('.nav-item[data-widget="all"]')); return; }
+  WIDGETS.forEach(w=>{
+    const card = document.querySelector(`[data-card="${w.id}"]`);
+    if(card){
+      const match = w.label.toLowerCase().includes(q) || w.id.toLowerCase().includes(q);
+      card.style.display = match ? '' : 'none';
+    }
+  });
+});
+
+// ─── FILTER BY WIDGET ──────────────────────────────────────────────
+function filterWidget(widgetId, el){
+  // Nav active state
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+
+  const grid = document.getElementById('grid-container');
+  const settings = document.getElementById('settings-panel');
+
+  if(widgetId === 'settings'){
+    grid.style.display='none';
+    settings.style.display='block';
+    buildSettingsPanel();
+    document.getElementById('page-title').textContent='Widget Ayarları';
+    document.getElementById('page-sub').textContent='Görünürlük ve düzen yönetimi';
+    document.getElementById('breadcrumb-label').textContent='Ayarlar';
+    return;
+  }
+
+  grid.style.display='';
+  settings.style.display='none';
+
+  // Breadcrumb & title
+  if(widgetId === 'all'){
+    document.getElementById('page-title').textContent='Tüm Widget\'lar';
+    document.getElementById('page-sub').innerHTML='10 bileşen · Son güncelleme: <span id="last-update">az önce</span>';
+    document.getElementById('breadcrumb-label').textContent='Tüm Widget\'lar';
+    document.querySelectorAll('[data-card]').forEach(c=>{
+      const id=c.getAttribute('data-card');
+      c.style.display = visibility[id] ? '' : 'none';
+    });
+  } else {
+    const w = WIDGETS.find(x=>x.id===widgetId);
+    document.getElementById('page-title').textContent = w ? w.icon+' '+w.label : widgetId;
+    document.getElementById('page-sub').textContent='Tek widget görünümü';
+    document.getElementById('breadcrumb-label').textContent = w ? w.label : widgetId;
+    document.querySelectorAll('[data-card]').forEach(c=>{
+      c.style.display = c.getAttribute('data-card')===widgetId ? '' : 'none';
+    });
+  }
+}
+
+// ─── SETTINGS PANEL ────────────────────────────────────────────────
+function buildSettingsPanel(){
+  const list = document.getElementById('widget-toggle-list');
+  list.innerHTML='';
+  WIDGETS.forEach(w=>{
+    const row = document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:10px;background:#0d0d15;border:1px solid #1e1e2e;';
+    row.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="width:34px;height:34px;border-radius:9px;background:#111118;display:flex;align-items:center;justify-content:center;font-size:17px;">${w.icon}</span>
+        <div>
+          <p style="font-size:13px;font-weight:500;color:#f1f5f9;">${w.label}</p>
+          <p style="font-size:11px;color:#4b5563;">${visibility[w.id]?'Görünür':'Gizli'}</p>
+        </div>
+      </div>
+      <div class="widget-tog ${visibility[w.id]?'on':''}" id="tog-${w.id}" onclick="toggleWidget('${w.id}')"></div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function toggleWidget(id){
+  visibility[id] = !visibility[id];
+  const tog = document.getElementById('tog-'+id);
+  if(tog) tog.classList.toggle('on', visibility[id]);
+  // update label
+  const row = tog?.closest('div[style]');
+  if(row){
+    const label = row.querySelector('p:last-child');
+    if(label) label.textContent = visibility[id]?'Görünür':'Gizli';
+  }
+  // reflect on grid
+  const card = document.querySelector(`[data-card="${id}"]`);
+  if(card) card.style.display = visibility[id] ? '' : 'none';
+}
+
+function toggleAllWidgets(show){
+  WIDGETS.forEach(w=>{ visibility[w.id]=show; });
+  document.querySelectorAll('[data-card]').forEach(c=>c.style.display=show?'':'none');
+  // if in settings, rebuild
+  if(document.getElementById('settings-panel').style.display!=='none') buildSettingsPanel();
+}
+
+// ─── REFRESH ───────────────────────────────────────────────────────
+function refreshAll(){
+  const btn = document.querySelector('[onclick="refreshAll()"]');
+  if(btn){ btn.style.color='#34d399'; setTimeout(()=>btn.style.color='',1200); }
+  // Burada gerçek API çağrıları tetiklenecek
+  console.log('Veriler yenileniyor... (API bağlantısı bekleniyor)');
+}
+
+// ─── MUSIC PLAYER BAR ──────────────────────────────────────────────
+const mbar=document.querySelector('.mbar');
+if(mbar) mbar.addEventListener('click',function(e){
+  const p=Math.max(0,Math.min(1,e.offsetX/this.offsetWidth));
+  document.querySelector('.mfill').style.width=(p*100)+'%';
+  document.querySelector('.mdot').style.left=((p*100)-1)+'%';
+});
+
+// ─── KEYBOARD SHORTCUT ─────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){
+    e.preventDefault();
+    document.getElementById('search-input').focus();
+  }
+});
+</script>
+</body>
+</html>
