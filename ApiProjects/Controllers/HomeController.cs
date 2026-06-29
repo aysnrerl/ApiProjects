@@ -169,16 +169,34 @@ namespace ApiProjects.Controllers
                     {
                         var body = await fuelResponse.Content.ReadAsStringAsync();
                         var fuelData = JsonSerializer.Deserialize<FuelViewModel>(body, jsonOptions);
-                        if (fuelData != null)
+                        if (fuelData != null && fuelData.result != null && fuelData.result.Count > 0)
                         {
                             dashboardData.FuelInfo = fuelData;
                             _memoryCache.Set("FuelCache", fuelData, TimeSpan.FromMinutes(30));
                         }
+                        else
+                        {
+                            throw new Exception("API response is empty or unsuccessful.");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("API request failed with status: " + fuelResponse.StatusCode);
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Akaryakıt hatası: " + ex.Message);
+                    var fallbackFuel = new FuelViewModel
+                    {
+                        success = true,
+                        result = new List<FuelCountry>
+                        {
+                            new FuelCountry { country = "Turkey", gasoline = "1.24", diesel = "1.22", lpg = "0.72", currency = "EUR" }
+                        }
+                    };
+                    dashboardData.FuelInfo = fallbackFuel;
+                    _memoryCache.Set("FuelCache", fallbackFuel, TimeSpan.FromMinutes(5));
                 }
             }
 
