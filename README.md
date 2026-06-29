@@ -8,47 +8,47 @@ Bu proje, günlük ihtiyaç duyulabilecek çeşitli canlı verileri (hava durumu
 
 ### 1. Ana Sayfa (Dashboard)
 Tüm widget'ların bir arada bulunduğu, dinamik olarak açılıp kapatılabilen modern karanlık temalı ana panel.
-![Ana Sayfa](ApiProjects/wwwroot/screenshots/dashboard.png)
+<img width="1919" height="880" alt="Image" src="https://github.com/user-attachments/assets/98340c92-c9f8-4d63-8153-73335c6271f0" />
 
 ### 2. Hava Durumu Detay
 Detaylı 3 günlük hava tahminleri, nem oranları, rüzgar hızları ve durum analizleri.
-![Hava Durumu](ApiProjects/wwwroot/screenshots/weather.png)
+<img width="1920" height="881" alt="Image" src="https://github.com/user-attachments/assets/152a61ff-1370-4070-8ad0-837a57bbcda7" />
 
 ### 3. Döviz Kurları
 USD bazlı olarak çekilen ve Türk Lirası dahil 12 farklı ülkenin canlı kur takibini sağlayan detay sayfası.
-![Döviz Kurları](ApiProjects/wwwroot/screenshots/currency.png)
+<img width="1918" height="878" alt="Image" src="https://github.com/user-attachments/assets/56f7951b-81d0-4e73-9add-0f10f8c00559" />
 
 ### 4. Kripto Para Piyasası
 En popüler 20 kripto para biriminin piyasa sıralaması, anlık fiyatları ve 24 saatlik değişim endeksleri.
-![Kripto Para](ApiProjects/wwwroot/screenshots/crypto.png)
+<img width="1920" height="879" alt="Image" src="https://github.com/user-attachments/assets/b0d73373-6d56-4c09-b1d0-ab58d9a42bcc" />
 
 ### 5. Avrupa Akaryakıt Fiyat Endeksi
 Türkiye ve Avrupa ülkelerine ait güncel benzin, motorin ve LPG litre fiyatlarının listelendiği detay sayfası.
-![Akaryakıt Fiyatları](ApiProjects/wwwroot/screenshots/fuel.png)
+<img width="1920" height="884" alt="Image" src="https://github.com/user-attachments/assets/37af18ca-0bb8-4aad-a816-5fa8f14d18d7" />
 
 ### 6. Süper Lig Puan Durumu
 Süper Lig güncel puan durumu tablosu, galibiyet, beraberlik, mağlubiyet ve gol averajı detayları.
-![Süper Lig](ApiProjects/wwwroot/screenshots/football.png)
+<img width="1920" height="879" alt="Image" src="https://github.com/user-attachments/assets/478932d7-c495-4c6e-bb08-0d89f93c55ea" />
 
 ### 7. Trend Filmler
 TMDB API altyapısı kullanılarak vizyondaki ve trend listelerindeki popüler sinema filmleri.
-![Trend Filmler](ApiProjects/wwwroot/screenshots/movies.png)
+<img width="1920" height="879" alt="Image" src="https://github.com/user-attachments/assets/9cc63cc2-268a-4610-9b6a-6969fe110767" />
 
 ### 8. Popüler Müzikler
 Deezer küresel listelerinin en popüler albümleri, şarkıları ve sanatçı bilgileri.
-![Popüler Müzikler](ApiProjects/wwwroot/screenshots/music.png)
+<img width="1920" height="878" alt="Image" src="https://github.com/user-attachments/assets/7521f9a9-562a-4a50-8ad0-35da481557c1" />
 
 ### 9. Son Dakika Haberler
 Ulusal haber kaynaklarından çekilen canlı ve anlık RSS haber akışı listesi.
-![Güncel Haberler](ApiProjects/wwwroot/screenshots/news.png)
+<img width="1920" height="882" alt="Image" src="https://github.com/user-attachments/assets/af889a09-c8ec-4a54-ab82-711efdcd7c64" />
 
 ### 10. Yemek Önerisi ve Tarifi
 Dünya mutfağından rastgele seçilen günün yemeği, malzemeleri ve adım adım hazırlanış tarifi.
-![Yemek Önerisi](ApiProjects/wwwroot/screenshots/recipe.png)
+<img width="1920" height="879" alt="Image" src="https://github.com/user-attachments/assets/17ccfc18-523c-4a37-923a-1d587617ec7f" />
 
 ### 11. Günün Motivasyon Sözü
 Zihni tazeleyen ve ilham veren günlük motivasyon sözleri ve yazarları.
-![Motivasyon Sözü](ApiProjects/wwwroot/screenshots/quote.png)
+<img width="1920" height="879" alt="Image" src="https://github.com/user-attachments/assets/70a6972d-4a8e-4459-9166-700d51ddce39" />
 
 ---
 
