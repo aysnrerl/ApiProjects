@@ -10,21 +10,45 @@ Bu proje, günlük ihtiyaç duyulabilecek çeşitli canlı verileri (hava durumu
 Tüm widget'ların bir arada bulunduğu, dinamik olarak açılıp kapatılabilen modern karanlık temalı ana panel.
 ![Ana Sayfa](ApiProjects/wwwroot/screenshots/dashboard.png)
 
-### 2. Döviz Kurları
+### 2. Hava Durumu Detay
+Detaylı 3 günlük hava tahminleri, nem oranları, rüzgar hızları ve durum analizleri.
+![Hava Durumu](ApiProjects/wwwroot/screenshots/weather.png)
+
+### 3. Döviz Kurları
 USD bazlı olarak çekilen ve Türk Lirası dahil 12 farklı ülkenin canlı kur takibini sağlayan detay sayfası.
 ![Döviz Kurları](ApiProjects/wwwroot/screenshots/currency.png)
 
-### 3. Avrupa Akaryakıt Fiyat Endeksi
+### 4. Kripto Para Piyasası
+En popüler 20 kripto para biriminin piyasa sıralaması, anlık fiyatları ve 24 saatlik değişim endeksleri.
+![Kripto Para](ApiProjects/wwwroot/screenshots/crypto.png)
+
+### 5. Avrupa Akaryakıt Fiyat Endeksi
 Türkiye ve Avrupa ülkelerine ait güncel benzin, motorin ve LPG litre fiyatlarının listelendiği detay sayfası.
 ![Akaryakıt Fiyatları](ApiProjects/wwwroot/screenshots/fuel.png)
 
-### 4. Son Dakika Haberler
+### 6. Süper Lig Puan Durumu
+Süper Lig güncel puan durumu tablosu, galibiyet, beraberlik, mağlubiyet ve gol averajı detayları.
+![Süper Lig](ApiProjects/wwwroot/screenshots/football.png)
+
+### 7. Trend Filmler
+TMDB API altyapısı kullanılarak vizyondaki ve trend listelerindeki popüler sinema filmleri.
+![Trend Filmler](ApiProjects/wwwroot/screenshots/movies.png)
+
+### 8. Popüler Müzikler
+Deezer küresel listelerinin en popüler albümleri, şarkıları ve sanatçı bilgileri.
+![Popüler Müzikler](ApiProjects/wwwroot/screenshots/music.png)
+
+### 9. Son Dakika Haberler
 Ulusal haber kaynaklarından çekilen canlı ve anlık RSS haber akışı listesi.
 ![Güncel Haberler](ApiProjects/wwwroot/screenshots/news.png)
 
-### 5. Trend Filmler
-TMDB API altyapısı kullanılarak vizyondaki ve trend listelerindeki popüler sinema filmleri.
-![Trend Filmler](ApiProjects/wwwroot/screenshots/movies.png)
+### 10. Yemek Önerisi ve Tarifi
+Dünya mutfağından rastgele seçilen günün yemeği, malzemeleri ve adım adım hazırlanış tarifi.
+![Yemek Önerisi](ApiProjects/wwwroot/screenshots/recipe.png)
+
+### 11. Günün Motivasyon Sözü
+Zihni tazeleyen ve ilham veren günlük motivasyon sözleri ve yazarları.
+![Motivasyon Sözü](ApiProjects/wwwroot/screenshots/quote.png)
 
 ---
 
@@ -34,50 +58,60 @@ Uygulama, her biri kendine ait denetleyiciye (Controller) ve arayüze (View) sah
 
 ### 1. 🌤 Hava Durumu (`/Weather`)
 *   **Kullanılan Servis:** Open-Meteo API (Açık kaynak, API anahtarı gerektirmez).
-*   **İşlev:** İstanbul için 3 günlük hava durumu tahminlerini (sıcaklık, hissedilen sıcaklık, rüzgar hızı ve nem oranları) getirir. Hava durumu kodlarına göre dinamik emojiler ve Türkçe açıklamalar sunar.
+*   **Açıklama:** İstanbul konumu için (`latitude=41.0082`, `longitude=28.9784`) 3 günlük hava durumu tahminlerini getirir. 
+*   **Teknik Detay:** Sıcaklık (`temperature_2m`), hissedilen sıcaklık (`apparent_temperature`), bağıl nem ve rüzgar hızı verilerini işler. Gelen sayısal hava durumu kodlarını (`weathercode`) Türkçe açıklamalara ve dinamik emojilere dönüştüren yardımcı metotlar barındırır.
 
 ### 2. 💱 Döviz Kurları (`/Currency`)
 *   **Kullanılan Servis:** Open Exchange Rates API.
-*   **İşlev:** Döviz bilgilerini USD tabanlı olarak çeker ve TRY, EUR, GBP, JPY, CHF, CAD, AUD, CNY, SAR, AED, NOK, SEK para birimlerinin anlık kurlarını listeler.
+*   **Açıklama:** Döviz bilgilerini USD tabanlı baz kod üzerinden çeker ve listeler.
+*   **Teknik Detay:** API'den dönen kurlar (`rates`) sözlüğünden (Dictionary) Türk Lirası (TRY) başta olmak üzere EUR, GBP, JPY, CHF, CAD, AUD, CNY, SAR, AED, NOK ve SEK değerleri ayıklanarak ekrana yansıtılır. Son güncelleme zamanı UTC olarak gösterilir.
 
 ### 3. 🪙 Kripto Para (`/Crypto`)
-*   **Kullanılan Servis:** CoinLore API.
-*   **İşlev:** Piyasa değerine göre en popüler 20 kripto parayı listeler. Günlük fiyat değişim oranlarını artış/azalış yönüne göre dinamik renklerle (Yeşil/Kırmızı) gösterir.
+*   **Kullanılan Servis:** CoinLore API (Açık kaynak, API anahtarı gerektirmez).
+*   **Açıklama:** Piyasa değerine göre en popüler 20 kripto parayı listeler.
+*   **Teknik Detay:** CoinLore `/api/tickers/` uç noktasından çekilen veriler `CoinGeckoCoin` veri modeline eşlenir. Fiyat değişim yüzdeleri (`percent_change_24h`) analiz edilerek pozitif değişimler yeşil yukarı yönlü okla (▲), negatif değişimler kırmızı aşağı yönlü okla (▼) gösterilir. Logolar dinamik olarak sunucudan yüklenir.
 
 ### 4. ⛽ Akaryakıt Fiyatları (`/Fuel`)
 *   **Kullanılan Servis:** Gas Price API (RapidAPI).
-*   **İşlev:** Türkiye ve Avrupa ülkelerine ait güncel benzin, dizel ve LPG litre fiyatlarını listeler. API istek limitlerinin aşılması durumunda uygulamanın aksamaması için **yedek veri (fallback) mekanizması** içerir.
+*   **Açıklama:** Türkiye ve Avrupa ülkelerine ait güncel benzin, dizel ve LPG litre fiyatlarını listeler.
+*   **Teknik Detay:** RapidAPI istek kotasının (Rate Limit) dolması veya servis kesintisi yaşanması durumunda uygulamanın aksamaması ve boş ekran göstermemesi için **Yedek Veri (Fallback)** mekanizması entegre edilmiştir. Hata durumunda bellekten son geçerli fiyatlar yüklenir.
 
 ### 5. ⚽ Süper Lig Zirvesi (`/FootballMatch`)
 *   **Kullanılan Servis:** Super Lig Standings API (RapidAPI).
-*   **İşlev:** Süper Lig'in güncel puan durumunu, takımların galibiyet/mağlubiyet sayılarını ve puanlarını canlı olarak listeler.
+*   **Açıklama:** Süper Lig'in güncel puan durumunu, takımların galibiyet/mağlubiyet sayılarını ve puanlarını canlı olarak listeler.
+*   **Teknik Detay:** `FootballMatchViewModel` içindeki takım logoları ve istatistik nesneleri (`stats`) parse edilir. Herhangi bir logo yükleme hatasına karşı yedek logo gösterimi (`onerror` fallback) arayüzde tanımlanmıştır.
 
 ### 6. 🎬 Günün Filmi (`/Movie`)
-*   **Kullanılan Servis:** TMDB (The Movie Database) API.
-*   **İşlev:** Vizyondaki en popüler trend filmleri afişleri, özetleri, çıkış tarihleri ve TMDB puanlarıyla birlikte listeler.
+*   **Kullanılan Servis:** TMDB (The Movie Database) API (Bearer Token Yetkilendirmeli).
+*   **Açıklama:** Vizyondaki en popüler trend filmleri afişleri, özetleri, çıkış tarihleri ve TMDB puanlarıyla birlikte listeler.
+*   **Teknik Detay:** HTTP isteklerine `Authorization: Bearer <token>` başlığı eklenerek TMDB v3 API'sinden günlük trend listesi çekilir. Afiş resimleri TMDB görsel sunucusundan (`https://image.tmdb.org/t/p/w500`) dinamik olarak çözümlenir.
 
 ### 7. 🎵 Günün Şarkısı (`/Music`)
-*   **Kullanılan Servis:** Deezer API.
-*   **İşlev:** Küresel müzik listelerinin zirvesindeki şarkıları, albüm kapaklarını ve sanatçı detaylarını listeler.
+*   **Kullanılan Servis:** Deezer API (Açık kaynak, API anahtarı gerektirmez).
+*   **Açıklama:** Küresel müzik listelerinin zirvesindeki şarkıları, albüm kapaklarını ve sanatçı detaylarını listeler.
+*   **Teknik Detay:** Deezer `/chart/0/tracks` endpoint'inden en popüler 10 şarkı çekilir. Müzik çalar arayüzünde çalınabilmesi için şarkıların 30 saniyelik ses önizleme (`preview`) adresleri de veri modelinde saklanır.
 
 ### 8. 📰 Güncel Haberler (`/NewsItem`)
 *   **Kullanılan Servis:** Hürriyet, Sabah ve NTV RSS Servisleri.
-*   **İşlev:** Güvenilir haber kaynaklarından anlık XML verilerini çekip parse ederek kullanıcılara reklamsız ve temiz bir haber listesi sunar.
+*   **Açıklama:** Güvenilir haber kaynaklarından anlık XML verilerini çekip parse ederek kullanıcılara reklamsız ve temiz bir haber listesi sunar.
+*   **Teknik Detay:** `System.Xml.Linq` (LINQ to XML) kütüphanesi kullanılarak harici RSS kanallarından dönen XML verileri asenkron olarak taranır. `<item>` düğümleri içerisindeki başlık (`title`), bağlantı (`link`) ve yayın tarihi (`pubDate`) alanları ayıklanarak `NewsItemViewModel` listesine dönüştürülür.
 
 ### 9. 🍳 Günün Tarifi (`/Recipe`)
-*   **Kullanılan Servis:** TheMealDB API.
-*   **İşlev:** Her gün için farklı bir dünya mutfağı yemeği, kategorisi, kökeni ve görselini içeren yemek tarifi önerisi sunar.
+*   **Kullanılan Servis:** TheMealDB API (Açık kaynak, API anahtarı gerektirmez).
+*   **Açıklama:** Her gün için farklı bir yemek, kategori, köken, görsel ve adım adım hazırlanış tarifi sunar.
+*   **Teknik Detay:** `/api/json/v1/1/search.php` uç noktasından çekilen yemek verileri parse edilir. Tarif detay sayfasında yemeğin malzemeleri ve hazırlık aşamaları şık bir şekilde listelenir.
 
 ### 10. ✍️ Günün Sözü (`/Quote`)
-*   **Kullanılan Servis:** ZenQuotes API.
-*   **İşlev:** Motivasyonel ve ilham verici sözleri yazarları ile birlikte listeler.
+*   **Kullanılan Servis:** ZenQuotes API (Açık kaynak, API anahtarı gerektirmez).
+*   **Açıklama:** Motivasyonel ve ilham verici sözleri yazarları ile birlikte listeler.
+*   **Teknik Detay:** ZenQuotes API'sinden gelen JSON dizisi `QuoteViewModel` listesine deserialize edilir. Önbellekte 6 saat boyunca saklanarak gereksiz dış isteklerin önüne geçilir.
 
 ---
 
 ## 🛠 Teknik Altyapı ve Mimarisi
 
-*   **Verimli Veri İletişimi:** Harici API servisleriyle iletişim kurulurken .NET'in performanslı `IHttpClientFactory` yapısı kullanılmıştır.
-*   **Önbellek Yönetimi (Caching):** API sağlayıcılarının istek sınırlarını (Rate Limit) aşmamak amacıyla `IMemoryCache` kullanılarak veriler bellekte önbelleğe alınmıştır. (Örneğin; döviz verileri 30 dakika, kripto verileri 10 dakika önbellekte tutulur).
+*   **Verimli Veri İletişimi:** Harici API servisleriyle iletişim kurulurken .NET'in performanslı `IHttpClientFactory` yapısı kullanılmıştır. Bu sayede soket tükenmesi (socket exhaustion) sorunlarının önüne geçilmiştir.
+*   **Önbellek Yönetimi (Caching):** API sağlayıcılarının istek sınırlarını (Rate Limit) aşmamak ve sayfa yüklenme hızını maksimuma çıkarmak amacıyla `IMemoryCache` kullanılarak veriler bellekte önbelleğe alınmıştır. (Örneğin; döviz verileri 30 dakika, kripto verileri 10 dakika, motivasyon sözleri ise 6 saat önbellekte tutulur).
 *   **Güvenli Anahtar Yönetimi (Secrets):** RapidAPI ve TMDB gibi servislerin hassas API anahtarları kaynak kodların içerisinden tamamen arındırılmış, `appsettings.json` içerisine taşınmıştır. Bu dosyanın GitHub'a kaza ile yüklenmesini engellemek için `.gitignore` yapılandırması tamamlanmıştır.
 
 ---
